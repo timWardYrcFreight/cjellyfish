@@ -124,6 +124,32 @@ static PyObject* jellyfish_levenshtein_distance(PyObject *self, PyObject *args)
     return Py_BuildValue("i", result);
 }
 
+static PyObject* jellyfish_weighted_levenshtein_distance(PyObject *self, PyObject *args)
+{
+    const Py_UNICODE *s1, *s2;
+    int len1, len2;
+    double result;
+    PyObject *insert_weights_dict;
+    PyObject *delete_weights_dict;
+    PyObject *substitute_weights_dict;
+
+    if (!PyArg_ParseTuple(args, "u#u#O!O!O!", &s1, &len1, &s2, &len2, &PyDict_Type, &insert_weights_dict, &PyDict_Type, &delete_weights_dict, &PyDict_Type, &substitute_weights_dict)) {
+        // TODO : Implement more generic error handling
+        // PyErr_SetFromErrno(PyExc_TypeError);
+        PyErr_SetString(PyExc_TypeError, NO_BYTES_ERR_STR);
+        return NULL;
+    }
+
+    result = weighted_levenshtein_distance(s1, len1, s2, len2, insert_weights_dict, delete_weights_dict, substitute_weights_dict);
+    if (result == -1) {
+        // weighted_levenshtein_distance only returns failure code (-1) on
+        // failed malloc
+        PyErr_NoMemory();
+        return NULL;
+    }
+
+    return Py_BuildValue("d", result);
+}
 
 static PyObject* jellyfish_damerau_levenshtein_distance(PyObject *self,
                                                         PyObject *args)
@@ -337,6 +363,10 @@ static PyMethodDef jellyfish_methods[] = {
     {"levenshtein_distance", jellyfish_levenshtein_distance, METH_VARARGS,
      "levenshtein_distance(string1, string2)\n\n"
      "Compute the Levenshtein distance between string1 and string2."},
+
+    {"weighted_levenshtein_distance", jellyfish_weighted_levenshtein_distance, METH_VARARGS,
+     "weighted_levenshtein_distance(string1, string2, insert_weights, delete_weights, subsitute_weights)\n\n"
+     "Compute the weighted Levenshtein distance between string1 and string2."},
 
     {"damerau_levenshtein_distance", jellyfish_damerau_levenshtein_distance,
      METH_VARARGS,

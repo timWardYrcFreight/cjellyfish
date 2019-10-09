@@ -20,6 +20,8 @@ size_t hamming_distance(const JFISH_UNICODE *str1, int len1,
 
 int levenshtein_distance(const JFISH_UNICODE *str1, int len1, const JFISH_UNICODE *str2, int len2);
 
+double weighted_levenshtein_distance(const JFISH_UNICODE *s1, int s1_len, const JFISH_UNICODE *s2, int s2_len, PyObject *insert_weights, PyObject *delete_weights, PyObject *substitute_weights);
+
 int damerau_levenshtein_distance(const JFISH_UNICODE *str1, const JFISH_UNICODE *str2,
         size_t len1, size_t len2);
 

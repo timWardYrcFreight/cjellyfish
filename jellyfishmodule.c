@@ -151,6 +151,31 @@ static PyObject* jellyfish_weighted_levenshtein_distance(PyObject *self, PyObjec
     return Py_BuildValue("d", result);
 }
 
+static PyObject* jellyfish_custom_weighted_levenshtein_distance(PyObject *self, PyObject *args)
+{
+    const Py_UNICODE *s1, *s2;
+    int len1, len2;
+    double result;
+    double insert_numeric_weight, insert_alpha_weight, delete_numeric_weight, delete_alpha_weight, substitute_numeric_weight, substitute_alpha_weight;
+
+    if (!PyArg_ParseTuple(args, "u#u#dddddd", &s1, &len1, &s2, &len2, &insert_numeric_weight, &insert_alpha_weight, &delete_numeric_weight, &delete_alpha_weight, &substitute_numeric_weight, &substitute_alpha_weight)) {
+        // TODO : Implement more generic error handling
+        //PyErr_SetFromErrno(PyExc_TypeError);
+        PyErr_SetString(PyExc_TypeError, "Grrr...Arg");
+        return NULL;
+    }
+
+    result = custom_weighted_levenshtein_distance(s1, len1, s2, len2, insert_numeric_weight, insert_alpha_weight, delete_numeric_weight, delete_alpha_weight, substitute_numeric_weight, substitute_alpha_weight);
+    if (result == -1) {
+        // weighted_levenshtein_distance only returns failure code (-1) on
+        // failed malloc
+        PyErr_NoMemory();
+        return NULL;
+    }
+
+    return Py_BuildValue("d", result);
+}
+
 static PyObject* jellyfish_damerau_levenshtein_distance(PyObject *self,
                                                         PyObject *args)
 {
@@ -366,6 +391,10 @@ static PyMethodDef jellyfish_methods[] = {
 
     {"weighted_levenshtein_distance", jellyfish_weighted_levenshtein_distance, METH_VARARGS,
      "weighted_levenshtein_distance(string1, string2, insert_weights, delete_weights, subsitute_weights)\n\n"
+     "Compute the weighted Levenshtein distance between string1 and string2."},
+
+    {"custom_weighted_levenshtein_distance", jellyfish_custom_weighted_levenshtein_distance, METH_VARARGS,
+     "custom_weighted_levenshtein_distance(string1, string2, insert_numeric_weight, insert_alpha_weight, delete_numeric_weight, delete_alpha_weight, substitute_numeric_weight, substitute_alpha_weight)\n\n"
      "Compute the weighted Levenshtein distance between string1 and string2."},
 
     {"damerau_levenshtein_distance", jellyfish_damerau_levenshtein_distance,
